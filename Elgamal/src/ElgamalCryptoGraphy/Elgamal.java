@@ -5,6 +5,7 @@ import FileOriented.SmallBinaryFiles;
 import KeyOriented.FastExponentiation;
 import KeyOriented.KeyGeneration;
 import KeyOriented.PrimeChecking;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -71,17 +72,15 @@ public class Elgamal
             //System.out.println("a value : "+cipherTextHM.keySet().toArray()[0]+" b value : " + test);
         }
         int logRound2 = 1;
-        String a = "";
+        String plainTextString = "";
         for(long test : plainText)
         {
-            String asdf = Long.toBinaryString(test);
-            a += asdf;
-            System.out.println("File block "+logRound2+"  Base10 value : " + test +" Binary : "+ asdf);
+            String binaryString = Long.toBinaryString(test);
+            plainTextString += binaryString;
+            System.out.println("File block "+logRound2+"  Base10 value : " + test +" Binary : "+ binaryString);
             logRound2++;
         }
-        int plain = Integer.parseInt(a, 2);
-        byte[] t = ByteBuffer.allocate(4).putInt(plain).array();
-        System.out.println("Check equal : " + Arrays.equals(bytes, t));
+        
     }
     
 }
