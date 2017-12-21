@@ -14,7 +14,7 @@ public class PrimeChecking
         GCD gcd = new GCD();
         if(gcd.GCD(randomNumInOddSet, oddNumber)!=1)
         {
-            System.out.println("GCD checked "+oddNumber+" is not a prime");
+            //System.out.println("GCD checked "+oddNumber+" is not a prime");
             return false;
         }
         else
@@ -25,12 +25,12 @@ public class PrimeChecking
             //System.out.println("result : "+result);
             if(result == 1 || result == -1 || result == oddNumber-1)
             {
-                System.out.println(oddNumber+" is a prime");
+                //System.out.println(oddNumber+" is a prime");
                 return true;
             }
             else 
             {
-                System.out.println(oddNumber+" is not a prime");
+                //System.out.println(oddNumber+" is not a prime");
                 return false;
             }
         }

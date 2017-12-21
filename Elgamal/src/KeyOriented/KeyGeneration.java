@@ -17,7 +17,7 @@ public class KeyGeneration
             alpha = new Random().nextInt((prime - 2) + 1) + 2;
         }
         //System.out.println("Publickey g value checking must not equal 1 : " + ((int)Math.pow(alpha, exponentiated)%prime));
-        int y = new FastExponentiation().modulo(alpha, u, prime);
+        int y = (int)new FastExponentiation().modulo(alpha, u, prime);
         publicKey[0] = prime;
         publicKey[1] = alpha;
         publicKey[2] = y;
@@ -28,11 +28,13 @@ public class KeyGeneration
         secretKey = new Random().nextInt((prime - 1) + 1) + 1;
     }
 
-    public int getSecretKey() {
+    public int getSecretKey() 
+    {
         return secretKey;
     }
 
-    public int[] getPublicKey() {
+    public int[] getPublicKey() 
+    {
         return publicKey;
     }
     

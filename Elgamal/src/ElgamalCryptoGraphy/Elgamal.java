@@ -1,86 +1,125 @@
 package ElgamalCryptoGraphy;
 
 import FileOriented.LargeBinaryFiles;
-import FileOriented.SmallBinaryFiles;
-import KeyOriented.FastExponentiation;
 import KeyOriented.KeyGeneration;
 import KeyOriented.PrimeChecking;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 public class Elgamal 
 {
     public static void main(String[] args) throws IOException, Exception 
     {
-        String filePath = "C:\\Test\\dog.jpg";
+        /*File read*/
+        String filePath = "C:\\Test\\test11.exe";
         LargeBinaryFiles largeBinary = new LargeBinaryFiles();
-        byte[] bytes = largeBinary.readToArray(filePath);
-        PrimeChecking primeChecking = new PrimeChecking();
-        int preCheckKey = largeBinary.get30BitsKeyInteger(bytes);
-        List<Integer> fileInteger = largeBinary.getFileBlocks();
-        while(!primeChecking.lehManTest(preCheckKey))
+        byte[] inputByteArray = largeBinary.readToArray(filePath);
+        /*for(byte b : inputByteArray)
         {
-            preCheckKey += 1;
+            System.out.println("File origal byte : " + b);
+        }*/
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
+        /*Key generation*/
+        int primeInteger = largeBinary.get30BitsInteger(inputByteArray);
+        List<Integer> plainText30BitsBlocks = largeBinary.getFileBlocks();
+        
+        for(int block : plainText30BitsBlocks)
+        {
+            if(block>primeInteger)
+            primeInteger = block;
+        }
+        
+        PrimeChecking primeChecking = new PrimeChecking();
+        while(!primeChecking.lehManTest(primeInteger))
+        {
+            primeInteger += 1;
         }
         KeyGeneration keyGeneration = new KeyGeneration();
-        keyGeneration.secretKey(preCheckKey);
+        keyGeneration.secretKey(primeInteger);
         int secretKey = keyGeneration.getSecretKey();
-        keyGeneration.publicKey(preCheckKey, secretKey);
+        keyGeneration.publicKey(primeInteger, secretKey);
         int[] publicKey = keyGeneration.getPublicKey();
-        System.out.println("Public key is : " + publicKey[0] + ", " + publicKey[1] + ", " + publicKey[2]);
-        System.out.println("Secret key is : " + secretKey);
-        
+        //System.out.println("Public key is : " + publicKey[0]/*p*/ + ", " + publicKey[1]/*g*/ + ", " + publicKey[2]/*y*/);
+        //System.out.println("Secret key is : " + secretKey/*u*/);
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
         /*Encryption*/
         Encryption encryption = new Encryption();
-        List<Long> bValues = new ArrayList<>();
-        long aValues = 0;
+        long cipherA = 0;
+        List<Long> cipherB = new ArrayList<>();
         HashMap<Long, List<Long>> cipherTextHM = new HashMap<>();
-        int logRound = 1;
-        for(int file : fileInteger)
+        long[] cipherTextBlock;
+        int logRound = 0;
+        for(int block : plainText30BitsBlocks)
         {
-            long[] cipherTextBlock = encryption.encrypt(publicKey[0], publicKey[1], publicKey[2], file);
-            System.out.println("Put hashmap round " + logRound);
-            System.out.println("a value : " + cipherTextBlock[0] + " b value : " + cipherTextBlock[1]);
-            bValues.add(cipherTextBlock[1]);
-            aValues = cipherTextBlock[0];
+            cipherTextBlock = encryption.encrypt(publicKey[0], publicKey[1], publicKey[2], block);
+            cipherA = cipherTextBlock[0]/*a*/;
+            cipherB.add(cipherTextBlock[1]/*b*/);
+            /*if(block>1073102840)
+            {
+            System.out.println("block : "+block);
+            System.out.println("a : "+cipherTextBlock[0]);
+            System.out.println("b : "+cipherTextBlock[1]);
+            }*/
+            //System.out.println("Ciphertext block : "+logRound+" a value : "+cipherTextBlock[0]+" b value : "+cipherTextBlock[1]);
             logRound++;
         }
-        cipherTextHM.put(aValues, bValues);
+        cipherTextHM.put(cipherA, cipherB);
         CipherTextDTO cipherTextDTO = new CipherTextDTO();
         cipherTextDTO.setCipherText(cipherTextHM);
-        List<Long> bValv = cipherTextHM.get(aValues);
-        for(long test : bValv)
-        {
-            System.out.println("a value : "+cipherTextHM.keySet().toArray()[0]+" b value : " + test);
-        }
-        
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------*/
         /*Decryption*/
-        List<Long> plainText = new ArrayList<>();
         Decryption decryption = new Decryption();
-        HashMap<Long, List<Long>> plainTextHM = new HashMap<>();
-        plainTextHM = cipherTextDTO.getCipherText();
-        for(long test : bValv)
+        List<Long> plainText = new ArrayList<>();
+        HashMap<Long, List<Long>> plainTextHM = cipherTextDTO.getCipherText();
+        List<Long> bValuesDecrypt = plainTextHM.get(cipherA);
+        
+        for(long b : bValuesDecrypt)
         {
-            plainText.add(decryption.decrypt((long)plainTextHM.keySet().toArray()[0], test, publicKey[0], secretKey));
-            //System.out.println("a value : "+cipherTextHM.keySet().toArray()[0]+" b value : " + test);
+            plainText.add(decryption.decrypt((long)plainTextHM.keySet().toArray()[0], b, publicKey[0], secretKey));
+            //System.out.println("a value : "+cipherTextHM.keySet().toArray()[0]+" b value : " + b);
         }
-        int logRound2 = 1;
+        int logRound2 = 0;
         String plainTextString = "";
-        for(long test : plainText)
+        for(long plain : plainText)
         {
-            String binaryString = Long.toBinaryString(test);
-            plainTextString += binaryString;
-            System.out.println("File block "+logRound2+"  Base10 value : " + test +" Binary : "+ binaryString);
+            plainTextString += String.format("%30s", Long.toBinaryString(plain)).replace(' ', '0');
+            //System.out.println("File block "+logRound2+" : "+String.format("%30s", Long.toBinaryString(plain)).replace(' ', '0')+"  Base10 : " + plain);
             logRound2++;
         }
+        /*System.out.println("Base10");
+        for(int i = 0; i<plainText.size(); i++)
+        {
+        if((plainText30BitsBlocks.get(i)^plainText.get(i))!=0)
+        {
+        System.out.println(plainText30BitsBlocks.get(i)+" "+plainText.get(i));
+        }
+        }
+        System.out.println();*/
         
+        StringBuilder stringBuilder = new StringBuilder(plainTextString);
+        stringBuilder.delete(plainTextString.length()-largeBinary.getPaddingAmount(), plainTextString.length());
+        byte[] outputByteArray = new byte[inputByteArray.length];
+        int outputIndex = 0;
+        for(int subStringIndex = 0; subStringIndex <  stringBuilder.length(); subStringIndex += 8)
+        {
+            outputByteArray[outputIndex] = (byte) Integer.parseInt(stringBuilder.substring(subStringIndex, subStringIndex+8), 2);
+            outputIndex++;
+        }
+        
+        for(int i = 0; i<outputByteArray.length; i++)
+        {
+            if((inputByteArray[i]^outputByteArray[i])!=0)
+            {
+                System.out.println(i+" "+inputByteArray[i] + " " + outputByteArray[i]);
+            }
+        }
+        
+        Path path = Paths.get("C:\\Test\\xxx.exe");
+        Files.write(path, outputByteArray);
     }
-    
 }

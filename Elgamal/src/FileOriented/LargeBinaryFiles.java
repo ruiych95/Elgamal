@@ -9,6 +9,7 @@ import java.util.List;
 public class LargeBinaryFiles 
 {
     private String fileDataBinary = "";
+    private int paddingAmount;
     
     public byte[] readToArray(String filePath) throws Exception 
     {
@@ -41,7 +42,7 @@ public class LargeBinaryFiles
         return outputBytes;
     }
      
-    public int get30BitsKeyInteger(byte[] bytes)
+    public int get30BitsInteger(byte[] bytes)
     {
         String result = "";
         String output = "";
@@ -59,7 +60,7 @@ public class LargeBinaryFiles
             if(c == '1')
             {
                 output = result.substring(i, 30);
-                System.out.println("30 bits key in binary : "+ output);
+                //System.out.println("30 bits key in binary : "+ output);
                 break;
             }
         }
@@ -89,21 +90,30 @@ public class LargeBinaryFiles
             try
             {
                fileBlock.add(Integer.parseInt(fileDataBinary.substring(index, index+30), 2));
-               System.out.println("File block " + logRound + " : " + fileDataBinary.substring(index, index+30) + "  Base10 : " + Integer.parseInt(fileDataBinary.substring(index, index+30), 2));
+               //System.out.println("File block " + logRound + " : " + fileDataBinary.substring(index, index+30) + "  Base10 : " + Integer.parseInt(fileDataBinary.substring(index, index+30), 2));
             }
             catch(IndexOutOfBoundsException e)//padding
             {
-                int paddingAmount = (index+30) - fileDataBinary.length();
+                paddingAmount = (index+30) - fileDataBinary.length();
                 for(int paddingIndex = 0; paddingIndex < paddingAmount; paddingIndex++)
                 {
                     padding += "0";
                 }
                 fileBlock.add(Integer.parseInt(fileDataBinary.substring(index, fileDataBinary.length()) + padding, 2));
-                System.out.println("Last block " + logRound + " : " + fileDataBinary.substring(index, fileDataBinary.length()) + padding + " (Padding : "+padding+")"+ "  Base10 : " + Integer.parseInt(fileDataBinary.substring(index, fileDataBinary.length()) + padding, 2));
+                //System.out.println("Last block " + logRound + " : " + fileDataBinary.substring(index, fileDataBinary.length()) + padding + " (Padding : "+padding+")"+ "  Base10 : " + Integer.parseInt(fileDataBinary.substring(index, fileDataBinary.length()) + padding, 2));
             }
             logRound++;
         }
         return fileBlock;
     }
 
+    public int getPaddingAmount()
+    {
+        return paddingAmount;
+    }
+    
+    public String getFileDataBinary()
+    {
+        return fileDataBinary;
+    }
 }
